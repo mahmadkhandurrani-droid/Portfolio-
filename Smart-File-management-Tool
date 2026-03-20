@@ -1,0 +1,88 @@
+import os import shutil from datetime import datetime
+
+LOG_FILE = "log.txt"
+
+def write_log(message): with open(LOG_FILE, "a") as log: time = datetime.now().strftime("%Y-%m-%d %H:%M:%S") log.write(f"[{time}] {message}\n")
+
+---------------- FILE ORGANIZER ----------------
+
+def organize_files(folder_path): try: for file in os.listdir(folder_path): file_path = os.path.join(folder_path, file)
+
+if os.path.isfile(file_path):
+            ext = os.path.splitext(file)[1][1:]
+
+            if ext == "":
+                ext = "no_extension"
+
+            target_folder = os.path.join(folder_path, ext)
+            os.makedirs(target_folder, exist_ok=True)
+
+            shutil.move(file_path, os.path.join(target_folder, file))
+            write_log(f"Moved {file} to {target_folder}")
+
+    print("Files organized successfully.")
+except Exception as e:
+    print("Error:", e)
+    write_log(f"ERROR in organize_files: {e}")
+
+---------------- BACKUP SCRIPT ----------------
+
+def backup_folder(source, destination): try: date_str = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") backup_path = os.path.join(destination, f"backup_{date_str}")
+
+shutil.copytree(source, backup_path)
+    print("Backup created at:", backup_path)
+
+    write_log(f"Backup created from {source} to {backup_path}")
+except Exception as e:
+    print("Error:", e)
+    write_log(f"ERROR in backup_folder: {e}")
+
+---------------- BULK RENAMER ----------------
+
+def rename_files(folder_path, prefix="", suffix=""): try: files = os.listdir(folder_path)
+
+for index, file in enumerate(files, start=1):
+        old_path = os.path.join(folder_path, file)
+
+        if os.path.isfile(old_path):
+            name, ext = os.path.splitext(file)
+            new_name = f"{prefix}{index}_{name}{suffix}{ext}"
+            new_path = os.path.join(folder_path, new_name)
+
+            os.rename(old_path, new_path)
+            write_log(f"Renamed {file} to {new_name}")
+
+    print("Renaming completed.")
+except Exception as e:
+    print("Error:", e)
+    write_log(f"ERROR in rename_files: {e}")
+
+---------------- MENU ----------------
+
+def menu(): while True: print("\n===== SMART FILE TOOL =====") print("1. Organize Files") print("2. Backup Folder") print("3. Bulk Rename Files") print("4. Exit")
+
+choice = input("Enter your choice: ")
+
+    if choice == "1":
+        path = input("Enter folder path: ")
+        organize_files(path)
+
+    elif choice == "2":
+        source = input("Enter source folder: ")
+        dest = input("Enter backup location: ")
+        backup_folder(source, dest)
+
+    elif choice == "3":
+        path = input("Enter folder path: ")
+        prefix = input("Enter prefix (optional): ")
+        suffix = input("Enter suffix (optional): ")
+        rename_files(path, prefix, suffix)
+
+    elif choice == "4":
+        print("Exiting...")
+        break
+
+    else:
+        print("Invalid choice. Try again.")
+
+if name == "main": menu()
